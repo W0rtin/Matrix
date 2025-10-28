@@ -1,0 +1,22 @@
+# Папка сборки CMake
+/build/
+
+# Объектные файлы и бинарники
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.so
+*.dylib
+
+# macOS мусор
+.DS_Store
+
+# Кэш IDE/редакторов
+*.swp
+*.swo
+*.user
+*.log
+.idea/
+.vscode/
