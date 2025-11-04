@@ -6,8 +6,10 @@
 int main() {
     clear_t();
 
-    int rows = 0;
-    int cols = 0;
+    int rows1 = 0;
+    int cols1 = 0;
+    int rows2 = 0;
+    int cols2 = 0;
 
     int** m1 = nullptr;
     int** m2 = nullptr;
@@ -39,68 +41,19 @@ int main() {
         switch (cmd) {
             // --- Пункт 1: задать размеры и выделить память ---
             case '1': {
-                std::cout << "Введите размеры матриц:\n";
-
-                std::cout << "rows = ";
-                if (!dig_esc(rows)) {
-                    std::cout << "\nОтмена ввода размеров.\n";
-                    std::cout << "\nНажмите любую клавишу...\n";
-                    getch();
-                    break;
-                }
-
-                std::cout << "cols = ";
-                if (!dig_esc(cols)) {
-                    std::cout << "\nОтмена ввода размеров.\n";
-                    std::cout << "\nНажмите любую клавишу...\n";
-                    getch();
-                    break;
-                }
-
-                if (rows <= 0 || cols <= 0) {
-                    std::cout << "Размеры должны быть > 0.\n";
-                    std::cout << "\nНажмите любую клавишу...\n";
-                    getch();
-                    break;
-                }
-
-                // Если у нас уже были матрицы старого размера — освободим
-                if (m1) {
-                    free_matrix(m1, rows);
-                    m1 = nullptr;
-                }
-                if (m2) {
-                    free_matrix(m2, rows);
-                    m2 = nullptr;
-                }
-
-                // Выделяем новые
-                m1 = create_matrix(rows, cols);
-                m2 = create_matrix(rows, cols);
-
-                if (!m1 || !m2) {
-                    std::cout << "Ошибка: не удалось выделить память.\n";
-                    // если одна создалась, а другая нет — подчистим
-                    if (m1) { free_matrix(m1, rows); m1 = nullptr; }
-                    if (m2) { free_matrix(m2, rows); m2 = nullptr; }
-                } else {
-                    std::cout << "Созданы две матрицы " << rows << "x" << cols << " и заполнены нулями.\n";
-                }
-
-                std::cout << "\nНажмите любую клавишу...\n";
-                getch();
+                set_matrices_size(m1, rows1, cols1, m2, rows2, cols2);
                 break;
             }
-
+            
             // --- Пункт 2: заполнить матрицу 1 ---
             case '2': {
                 if (!m1) {
                     std::cout << "Сначала задайте размеры (пункт 1).\n";
                 } else {
                     std::cout
-                        << "Заполнение матрицы 1 (" << rows << "x" << cols << ")\n"
+                        << "Заполнение матрицы 1 (" << rows1 << "x" << cols1 << ")\n"
                         << "Подсказка: Esc в любой момент = отмена.\n\n";
-                    if (!fill(m1, rows, cols)) {
+                    if (!fill(m1, rows1, cols1)) {
                         std::cout << "\nЗаполнение матрицы 1 прервано.\n";
                     } else {
                         std::cout << "\nМатрица 1 заполнена.\n";
@@ -118,9 +71,9 @@ int main() {
                     std::cout << "Сначала задайте размеры (пункт 1).\n";
                 } else {
                     std::cout
-                        << "Заполнение матрицы 2 (" << rows << "x" << cols << ")\n"
+                        << "Заполнение матрицы 2 (" << rows2 << "x" << cols2 << ")\n"
                         << "Подсказка: Esc в любой момент = отмена.\n\n";
-                    if (!fill(m2, rows, cols)) {
+                    if (!fill(m2, rows2, cols2)) {
                         std::cout << "\nЗаполнение матрицы 2 прервано.\n";
                     } else {
                         std::cout << "\nМатрица 2 заполнена.\n";
@@ -138,16 +91,16 @@ int main() {
                     std::cout << "Матрицы ещё не готовы для вывода.\n";
                 } else {
                     std::cout << "Матрица 1:\n";
-                    for (int i = 0; i < rows; i++) {
-                        for (int j = 0; j < cols; j++) {
+                    for (int i = 0; i < rows1; i++) {
+                        for (int j = 0; j < cols1; j++) {
                             std::cout << m1[i][j] << ' ';
                         }
                         std::cout << '\n';
                     }
 
                     std::cout << "\nМатрица 2:\n";
-                    for (int i = 0; i < rows; i++) {
-                        for (int j = 0; j < cols; j++) {
+                    for (int i = 0; i < rows2; i++) {
+                        for (int j = 0; j < cols2; j++) {
                             std::cout << m2[i][j] << ' ';
                         }
                         std::cout << '\n';
@@ -174,6 +127,7 @@ int main() {
                     << "Операции с матрицами:\n"
                     << "1 - m1 + m2\n"
                     << "2 - m1 - m2\n"
+                    << "3 - m1 * m2\n"
                     << "Esc - Назад\n";
 
                 int subcmd = getch();
@@ -183,33 +137,47 @@ int main() {
 
                 clear_t();
 
-                if (subcmd == '1') {
-                    int** m_sum = sum_matrix(m1, m2, rows, cols);
+                if (subcmd == '1') { //Сложение m1+m2
+                    int** m_sum = sum_matrix(m1, rows1, cols1, m2, rows2, cols2);
                     if (!m_sum) {
-                        std::cout << "Ошибка при сложении матриц.\n";
+                        std::cout << "Ошибка при сложении матриц (возможно, размеры не совпадают).\n";
                     } else {
                         std::cout << "m1 + m2:\n";
-                        for (int i = 0; i < rows; i++) {
-                            for (int j = 0; j < cols; j++) {
+                        for (int i = 0; i < rows1; i++) {
+                            for (int j = 0; j < cols1; j++) {
                                 std::cout << m_sum[i][j] << ' ';
                             }
                             std::cout << '\n';
                         }
-                        free_matrix(m_sum, rows);
+                        free_matrix(m_sum, rows1);
                     }
-                } else if (subcmd == '2') {
-                    int** m_diff = sub_matrix(m1, m2, rows, cols);
+                } else if (subcmd == '2') { //Вычитание матриц m1-m2
+                    int** m_diff = sub_matrix(m1, rows1, cols1, m2, rows2, cols2);
                     if (!m_diff) {
-                        std::cout << "Ошибка при вычитании матриц.\n";
+                        std::cout << "Ошибка при вычитании матриц (возможно, размеры не совпадают).\n";
                     } else {
                         std::cout << "m1 - m2:\n";
-                        for (int i = 0; i < rows; i++) {
-                            for (int j = 0; j < cols; j++) {
+                        for (int i = 0; i < rows1; i++) {
+                            for (int j = 0; j < cols1; j++) {
                                 std::cout << m_diff[i][j] << ' ';
                             }
                             std::cout << '\n';
                         }
-                        free_matrix(m_diff, rows);
+                        free_matrix(m_diff, rows1);
+                    }
+                } else if (subcmd == '3') { //Произведение матриц m1 * m2
+                    int** mul_m = multiplication_matrix(m1, rows1, cols1, m2, rows2, cols2);
+                    if (!mul_m) {
+                        std::cout << "Ошибка при произведении матриц (проверьте: cols1 == rows2).\n";
+                    } else {
+                        std::cout << "m1 * m2:\n";
+                        for (int i = 0; i < rows1; i++) {
+                            for (int j = 0; j < cols2; j++) {
+                                std::cout << mul_m[i][j] << ' ';
+                            }
+                            std::cout << '\n';
+                        }
+                        free_matrix(mul_m, rows1);
                     }
                 } else {
                     std::cout << "Неизвестная операция.\n";
@@ -231,14 +199,15 @@ int main() {
     }
 
     // Перед выходом — подчистить память
-    if (m1) {
-        free_matrix(m1, rows);
+    if (m1 && rows1 > 0) {
+        free_matrix(m1, rows1);
         m1 = nullptr;
     }
-    if (m2) {
-        free_matrix(m2, rows);
+    if (m2 && rows2 > 0) {
+        free_matrix(m2, rows2);
         m2 = nullptr;
     }
+
 
     clear_t();
     std::cout << "Выход.\n";
